@@ -1,0 +1,18 @@
+[project]
+name = "RobotVision"
+version = "2023.0.9"
+description = "Custom Robot Vision system for industrial robots"
+requires-python = ">=3.7"
+keywords = ["vision", "computer vision", "robot vision", "robot", "augmented reality"]
+authors = [{name = "Matthew DiMaggio", email = "mdimaggio@ltu.edu"}]
+maintainers = [{name = "Matthew DiMaggio", email = "mdimaggio@ltu.edu"}]
+dependencies = [
+    "math",
+    "numpy",
+    "opencv_contrib_python==4.5.5.62",
+    "pathlib",
+    "tqdm",
+]
+
+[project.urls]
+Repository = "https://github.com/Echoos1/Robot-Vision.git"
