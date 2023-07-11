@@ -17,7 +17,8 @@ import numpy as np
 import cv2 as cv
 from cv2 import aruco
 
-print("Establishing Camera")
+# Camera Configuration and Setup
+print("[INFO] Configuring Camera")
 time1 = time.time()
 picam2 = Picamera2()
 camera_config = picam2.create_still_configuration(
@@ -26,10 +27,28 @@ camera_config = picam2.create_still_configuration(
     display="lores"
     )
 picam2.configure(camera_config)
+with np.load("CameraCalibArUCo.npz") as X:
+    mtx, dist, calib_rvec, calib_tvec = [
+        X[i] for i in ("mtx", "dist", "rvecs", "tvecs")
+    ]
 time2=time.time()
-print(f'Establishing Done! Took {(time2-time1):.01f} seconds')
+print(f'[INFO] Configuration Complete! Took {(time2-time1):.01f} seconds')
+
 
 def rotMtxToQuat(rotm: np.array) -> list:
+    """Converts a Rotation Matrix to a 4x1 Quaternion.
+    
+    Credits:
+        Copyright (c) 1998-2023 Martin John Baker
+        https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+
+    Args:
+        rotm (np.array): A 3x3 Roation Matrix returned by opencv functions
+
+    Returns:
+        list: A 4x1 WXYZ Quaternion -- [W,X,Y,Z]
+    """  
+      
     tr = rotm[0][0] + rotm[1][1] + rotm[2][2]
 
     if tr > 0:
@@ -61,29 +80,43 @@ def rotMtxToQuat(rotm: np.array) -> list:
 
 
 def takePhoto(filepath: str) -> bool:
+    """Takes a photo with a Raspberry Pi Camera
+
+    Args:
+        filepath (str): The filepath of the image to be taken
+
+    Returns:
+        bool: Returns True if taken successfully, False if not
+    """   
+     
     try:
-        print("Taking Picture...")
+        print("[INFO] Taking Picture...")
         picam2.start()
         picam2.capture_file(filepath)
         picam2.stop()
         time2=time.time()
-        print(f'Capturing Done! Took {(time2-time1):.01f} seconds')
-        print(f'Saved at: {filepath}')
+        print(f'[INFO] Capturing Done! Took {(time2-time1):.01f} seconds')
+        print(f'[INFO] Saved at: {filepath}')
         return True
     except Exception:
-        print("Capturing Failed")
+        print("[ERROR] Capturing Failed")
         return False
 
 
 def analyzeImage(filepath: str) -> list:
-    print("Analysing Image...")
-    time1=time.time()
-    # Load Camera Calibration Data
-    with np.load("CameraCalibArUCo.npz") as X:
-        mtx, dist, calib_rvec, calib_tvec = [
-            X[i] for i in ("mtx", "dist", "rvecs", "tvecs")
-        ]
+    """Uses OpenCV to find the camera pose using an image of ArUCo Boards.
 
+    Args:
+        filepath (str): The filepath of the image to be analysed.
+
+    Returns:
+        list: Two nested Lists of each ArUCo board position and rotation
+        [[PickupBoard Pose and Rot],[Dropoff Board Pose and Rot]]
+    """    
+    
+    print("[INFO] Analysing Image...")
+    time1=time.time()
+    
     # Specify ArUCo Dictionary
     aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_5X5_100)
 
@@ -95,7 +128,7 @@ def analyzeImage(filepath: str) -> list:
     frame = cv.imread(str(filepath))
 
     # Detect ArUCo markers
-    gray = cv.cvtColor(frame, cv.COLOR_RGB2GRAY)
+    gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     parameters = aruco.DetectorParameters_create()
     corners, ids, rejects = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
     corners, ids, _, _ = aruco.refineDetectedMarkers(
