@@ -5,6 +5,7 @@ description = "Custom Robot Vision system for industrial robots"
 readme = "README.md"
 requires-python = ">=3.7"
 keywords = ["vision", "computer vision", "robot vision", "robot", "augmented reality"]
+license = {file = "LICENSE"}
 authors = [{name = "Matthew DiMaggio", email = "mdimaggio@ltu.edu"}]
 maintainers = [{name = "Matthew DiMaggio", email = "mdimaggio@ltu.edu"}]
 dependencies = [
