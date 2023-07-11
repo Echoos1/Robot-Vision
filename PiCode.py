@@ -2,7 +2,7 @@
 """detect_aruco.py: Locates the camera pose in space.
 """
 
-__version__ = "0.8.0"
+__version__ = "0.10.0"
 
 __author__ = "Matthew DiMaggio"
 __date__ = "10 July 2023"
@@ -33,6 +33,14 @@ with np.load("CameraCalibArUCo.npz") as X:
     ]
 time2=time.time()
 print(f'[INFO] Configuration Complete! Took {(time2-time1):.01f} seconds')
+
+
+def getInput():
+    robstep = input("ENTER for CONTINUE, ELSE for QUIT: ")
+    if robstep == "":
+        return True
+    else:
+        return False
 
 
 def rotMtxToQuat(rotm: np.array) -> list:
@@ -196,19 +204,25 @@ def analyzeImage(filepath: str) -> list:
 
 
 def main():
-    root = Path(__file__).parent.absolute()
-    img_name = root.joinpath("capture.jpg")
-    ret = takePhoto(img_name)
-    if ret:
-        pose = analyzeImage(img_name)
-        print("\nPickup Pose")
-        print(f"X: {pose[0][0]:.01f} Y: {pose[0][1]:.01f} Z: {pose[0][2]:.01f}")
-        print(f"[{pose[0][3]:.01f},{pose[0][4]:.01f},", end="")
-        print(f"{pose[0][5]:.01f},{pose[0][6]:.01f}]")
-        print("Dropoff Pose")
-        print(f"X: {pose[1][0]:.01f} Y: {pose[1][1]:.01f} Z: {pose[1][2]:.01f}")
-        print(f"[{pose[1][3]:.04f},{pose[1][4]:.04f},", end="")
-        print(f"{pose[1][5]:.04f},{pose[1][6]:.04f}]")
+    robstep = getInput()
+    if robstep:
+        root = Path(__file__).parent.absolute()
+        img_name = root.joinpath("capture.jpg")
+        ret = takePhoto(img_name)
+        if ret:
+            pose = analyzeImage(img_name)
+            print("\nPickup Pose")
+            print(f"X: {pose[0][0]:.01f} Y: {pose[0][1]:.01f} Z: {pose[0][2]:.01f}")
+            print(f"[{pose[0][3]:.01f},{pose[0][4]:.01f},", end="")
+            print(f"{pose[0][5]:.01f},{pose[0][6]:.01f}]")
+            print("Dropoff Pose")
+            print(f"X: {pose[1][0]:.01f} Y: {pose[1][1]:.01f} Z: {pose[1][2]:.01f}")
+            print(f"[{pose[1][3]:.04f},{pose[1][4]:.04f},", end="")
+            print(f"{pose[1][5]:.04f},{pose[1][6]:.04f}]\n")
+            main()
+    else:
+        quit()
+    
 
 
 if __name__ == "__main__":
