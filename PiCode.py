@@ -2,20 +2,34 @@
 """detect_aruco.py: Locates the camera pose in space.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.8.0"
 
 __author__ = "Matthew DiMaggio"
 __date__ = "10 July 2023"
 __requires__ = "opencv_contrib_python==4.5.5.62"
 
+import time
 import math
 
+from picamera2 import Picamera2
+from pathlib import Path
 import numpy as np
 import cv2 as cv
 from cv2 import aruco
 
+print("Establishing Camera")
+time1 = time.time()
+picam2 = Picamera2()
+camera_config = picam2.create_still_configuration(
+    main={"size": (1920,1080)}, 
+    lores={"size": (640,480)}, 
+    display="lores"
+    )
+picam2.configure(camera_config)
+time2=time.time()
+print(f'Establishing Done! Took {(time2-time1):.01f} seconds')
 
-def rotMtxToQuat(rotm):
+def rotMtxToQuat(rotm: np.array) -> list:
     tr = rotm[0][0] + rotm[1][1] + rotm[2][2]
 
     if tr > 0:
@@ -46,7 +60,24 @@ def rotMtxToQuat(rotm):
     return [qw, qx, qy, qz]
 
 
-def analyzeImage(image):
+def takePhoto(filepath: str) -> bool:
+    try:
+        print("Taking Picture...")
+        picam2.start()
+        picam2.capture_file(filepath)
+        picam2.stop()
+        time2=time.time()
+        print(f'Capturing Done! Took {(time2-time1):.01f} seconds')
+        print(f'Saved at: {filepath}')
+        return True
+    except Exception:
+        print("Capturing Failed")
+        return False
+
+
+def analyzeImage(filepath: str) -> list:
+    print("Analysing Image...")
+    time1=time.time()
     # Load Camera Calibration Data
     with np.load("CameraCalibArUCo.npz") as X:
         mtx, dist, calib_rvec, calib_tvec = [
@@ -61,7 +92,7 @@ def analyzeImage(image):
     dropoffboard = cv.aruco.GridBoard_create(5, 6, 30, 10, aruco_dict, 30)
 
     # Open image to read
-    frame = cv.imread(image)
+    frame = cv.imread(str(filepath))
 
     # Detect ArUCo markers
     gray = cv.cvtColor(frame, cv.COLOR_RGB2GRAY)
@@ -81,8 +112,9 @@ def analyzeImage(image):
         )
 
         if ret_p > 0:  # If the "Pickup" ArUCo board is detected...
-            pz = ((tvec_p[2][0])) / 1.69
-            px = -((-0.37 * pz) - (tvec_p[0][0]))
+            pz = tvec_p[2][0] * 1.279
+            px = tvec_p[0][0]
+            py = tvec_p[1][0]
             py = -((-0.34 * pz) - (tvec_p[1][0]))
             pquatx = rotMtxToQuat(cv.Rodrigues(rvec_p)[0])[0]
             pquaty = rotMtxToQuat(cv.Rodrigues(rvec_p)[0])[1]
@@ -98,9 +130,9 @@ def analyzeImage(image):
             pquatw = 0
 
         if ret_d > 0:  # If the "Dropoff" ArUCo board is detected...
-            dz = ((tvec_d[2][0])) / 1.69
-            dx = -((-0.37 * dz) - (tvec_d[0][0]))
-            dy = -((-0.34 * dz) - (tvec_d[1][0]))
+            dz = tvec_d[2][0] * 1.279
+            dx = tvec_d[0][0]
+            dy = tvec_d[1][0]
             dquatx = rotMtxToQuat(cv.Rodrigues(rvec_d)[0])[0]
             dquaty = rotMtxToQuat(cv.Rodrigues(rvec_d)[0])[1]
             dquatz = rotMtxToQuat(cv.Rodrigues(rvec_d)[0])[2]
@@ -114,12 +146,16 @@ def analyzeImage(image):
             dquatz = 0
             dquatw = 0
 
+        time2=time.time()
+        print(f'Finished Analysis! Took {(time2-time1):.01f} seconds')
         return [
             [px, py, pz, pquatx, pquaty, pquatz, pquatw],
             [dx, dy, dz, dquatx, dquaty, dquatz, dquatw],
         ]
 
     else:  # If no ArUCo markers are detected...
+        time2=time.time()
+        print(f'DONE! No Markers Found! Took {(time2-time1):.01f} seconds')
         return [
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
@@ -127,15 +163,19 @@ def analyzeImage(image):
 
 
 def main():
-    pose = analyzeImage("testing.jpg")
-    print("Pickup Pose")
-    print(f"X={pose[0][0]:.01f} Y={pose[0][1]:.01f} Z={pose[0][2]:.01f}")
-    print(f"qX={pose[0][3]:.01f} qY={pose[0][4]:.01f} ", end="")
-    print(f"qZ={pose[0][5]:.01f} qW={pose[0][6]:.01f}")
-    print("Dropoff Pose")
-    print(f"X={pose[1][0]:.01f} Y={pose[1][1]:.01f} Z={pose[1][2]:.01f}")
-    print(f"qX={pose[1][3]:.04f} qY={pose[1][4]:.04f} ", end="")
-    print(f"qZ={pose[1][5]:.04f} qW={pose[1][6]:.04f}")
+    root = Path(__file__).parent.absolute()
+    img_name = root.joinpath("capture.jpg")
+    ret = takePhoto(img_name)
+    if ret:
+        pose = analyzeImage(img_name)
+        print("\nPickup Pose")
+        print(f"X: {pose[0][0]:.01f} Y: {pose[0][1]:.01f} Z: {pose[0][2]:.01f}")
+        print(f"[{pose[0][3]:.01f},{pose[0][4]:.01f},", end="")
+        print(f"{pose[0][5]:.01f},{pose[0][6]:.01f}]")
+        print("Dropoff Pose")
+        print(f"X: {pose[1][0]:.01f} Y: {pose[1][1]:.01f} Z: {pose[1][2]:.01f}")
+        print(f"[{pose[1][3]:.04f},{pose[1][4]:.04f},", end="")
+        print(f"{pose[1][5]:.04f},{pose[1][6]:.04f}]")
 
 
 if __name__ == "__main__":
