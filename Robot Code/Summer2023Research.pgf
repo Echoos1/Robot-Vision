@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<Program>
+	<Module>Bottle_Defs.mod</Module>
+	<Module>Gripper_Defs.mod</Module>
+	<Module>LightBulb_Defs.mod</Module>
+	<Module>MainModule.mod</Module>
+	<Module>RaspiVision.mod</Module>
+	<Module>Lightbulb_Calib.mod</Module>
+	<Module>BasicFunctions.mod</Module>
+</Program>
