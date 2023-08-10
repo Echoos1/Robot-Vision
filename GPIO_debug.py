@@ -3,13 +3,12 @@
 User will enter a number into a prompt and the Pi will output the number in binary.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.9.0"
 
 __author__ = "Matthew DiMaggio"
 __date__ = "13 June 2023"
 
 import time
-import random
 
 import RPi.GPIO as GPIO
 
@@ -28,7 +27,7 @@ def intTobinary(int):
 		binarylst[0] = 1
 	else:
 		binarylst[0] = 0
-
+	print(binarylst)
 	return binarylst
 
 
@@ -137,22 +136,11 @@ def main():
 	if GPIO.input(StopExec):
 		StopCallback()
 
-	go = True
+	binary = intTobinary(int(input("Number between -2047 and 2047: ")))
+	resetBin()
+	setBin(binary)
+	time.sleep(.5)
 
-	if go: #GPIO.input(Robr):
-		binary = intTobinary(int(round(float(input("Number between -2047 and 2047: ")),0)))
-		#binary = intTobinary(random.randrange(-2047, 2048, 1))
-		setBin(binary)
-		time.sleep(.5)
-
-		"""
-		if Count.num >= 2048:
-			Count.num = -2047
-		else:
-			Count.num += 1
-		"""
-	else:
-		pass
 
 if __name__ == '__main__':
 	while True:

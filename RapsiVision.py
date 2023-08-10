@@ -2,7 +2,7 @@
 """RaspiVision.py: Locates the camera pose in space.
 """
 
-__version__ = "0.10.0"
+__version__ = "1.0.0"
 
 __author__ = "Matthew DiMaggio"
 __date__ = "10 July 2023"
