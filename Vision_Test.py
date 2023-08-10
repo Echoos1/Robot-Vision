@@ -1,5 +1,8 @@
 #!/usr/bin python generate_aruco.py
-"""detect_aruco.py: Detects aruco tags to be used by robot vision and OpenCV for 3D locating information.
+"""Vision_Test.py: Tests the vision code for use in RaspiVision.
+Detects the position and orientation of ArUCo Tag Boards and 
+displays their axis frames on the screen. Recommended for use on a 
+PC or other test device with a monitor prior to loading code on camera.
 """
 
 __version__ = "0.7.1"
