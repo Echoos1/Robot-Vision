@@ -83,9 +83,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+![Product Name Screen Shot][product-screenshot]
 
-Created through a fellowship with Ballard International LLC (https://ballardintl.com/)
+Created through a fellowship with [Ballard International LLC](https://ballardintl.com/)
 
 Industrial robots typically are not aware of 3D space, and all positions must be hard-coded in by an operator. The robot vision solutions that currently exist are usually for conveyor tracking in 2D or rough 3D, and full 3D tracking is often quite expensive and application specific.
 
@@ -115,6 +115,7 @@ Before you begin, you will need:
 * Access to an industrial robot
   * ABB Preferred. (You will have to translate your own code for any other brand)
 * A Raspberry Pi with python 3
+* A Raspberry Pi Camera
 * A 3D printer
   * Some kind of 3D modeling software would be helpful
 
@@ -135,21 +136,32 @@ You will also need a specific fork and version of OpenCV, numpy, and tqdm
   sudo pip3 install tqdm
   ```
 
+* 3D print your monting plate for the gripper.
+  * My STL files are included for the ABB IRB 4600-45/2.05 Type A with an unknown gripper module. It is likely you will have to create your own mount for the gripper/camera.
+  * If you use a different mount, you will also need to modify the tooldata parameters in `Robot Code\BASE.mod`
+  
+* Print both ArUCo Tag Boards in `Boards` on 8.5"x11" paper at 100% scale. The size is very important. The size of each tag should be 30x30mm and each space between tags to be 10mm.
+  * Mount the boards to a flat surface, or otherwise ensure the boards are flat whenever they are viewed by the camera
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/Echoos1/Robot-Vision.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
+1. Download all files from the repository
+2. Move the "Robot Code" folder onto a USB and then onto the robot.
+   * Open the *.pgf file to load the program on the robot.
+3. When your camera is attached to the Pi, take around 40 pictures of the first `ArUCo Tags 0 - 29; Pickup Location` tag board and put the photos in `Pi Code\calib_imgs`. Then run `Pi Code\Calibrate_Camera.py`.
+
+### Camera Wiring
+
+The camera will need to be wired properly to the I/O connections of the robot.
+
+> PLEASE NOTE: This wiring is for the R2.CS plug on the ABB IRB 4600. Other models may have similar plugs, or not at all. The wires in the diagram are also labeled with their respective I/O signal, so if you are using a different robot, use that as a guide for proper communication wiring.
+
+![WiringDiagram][WiringDiagram]
+
+Because the robot I/O is 24v, and the Pi is 3.3v, all signals between the two will need to be converted.
+
+24v to 3.3v: [Amazon](https://www.amazon.com/DZS-Elec-Converter-Adjustable-Regulator/dp/B07JWGN1F6/ref=sr_1_5?crid=2RQXZ117LP9O3&keywords=24v+to+3.3v+dc+converter&qid=1686676501&sprefix=24v+to+3.3v+dc+converter%2Caps%2C152&sr=8-5)
+
+3.3v to 24v: [Amazon](https://www.amazon.com/Converter-Adjustable-Voltage-Regulator-Compatible/dp/B09S8ZDVBN/ref=sr_1_6?crid=2ST5BG6NCYT7B&keywords=3.3v%2Bto%2B24v%2Bboost%2Bconverter&qid=1686677500&sprefix=3.3v%2Bto%2B24v%2Bboost%2Bconverter%2Caps%2C112&sr=8-6&th=1)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -158,9 +170,19 @@ You will also need a specific fork and version of OpenCV, numpy, and tqdm
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+### Standard Use
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+1. Load and run the program on the robot
+2. Load and run `Pi Code\RapsiVision.py` on the pi
+3. Wait for the camera and the robot to synchronize
+   * The robot pendant and the camera console will print status information
+3. Press play on the robot to locate a visible board to move to
+
+### Debug and Testing Features
+
+* `Pi Code\GPIO_debug.py` will give you control over the I/O signals from the Pi to test the connections to the robot
+* `Pi Code\Vision_Test.py` will run the camera and locating script locally
+  * This is designed to be run on a PC with a webcam, rather than the pi
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -169,10 +191,11 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
+- [ ] Add movement options for both Tag Boards on the robot
+- [ ] Add a scanning procedure to find boards anywhere around the robot
+- [ ] Improve accuracy
+- [ ] Improve photo analysis speed
+- [ ] Improve Cam-Robot communication speed
 
 See the [open issues](https://github.com/Echoos1/Robot-Vision/issues) for a full list of proposed features (and known issues).
 
@@ -221,9 +244,8 @@ Project Link: [https://github.com/Echoos1/Robot-Vision](https://github.com/Echoo
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* []()
-* []()
-* []()
+* [Ballard International LLC](https://ballardintl.com/)
+* [Lawrence Technological University](https://ltu.edu/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -244,6 +266,7 @@ Project Link: [https://github.com/Echoos1/Robot-Vision](https://github.com/Echoo
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/matthew-dimaggio-372039235
 [product-screenshot]: images/screenshot.jpg
+[WiringDiagram]: images/wiring_diagram.png
 
 [Python]: https://img.shields.io/badge/Python-306998?style=for-the-badge&logo=python&logoColor=white
 [Python-url]: https://www.python.org/
