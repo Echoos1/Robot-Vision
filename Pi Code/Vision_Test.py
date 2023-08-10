@@ -275,8 +275,8 @@ def main():
                 dy = -((-0.34*dz)-(tvec_d[1][0]))
 
                 # Writes the position and rotation to a file to be read live by a 3D simulator for debug purposes
-                file_d = "C:/Users/mdimaggio/Documents/Summer Research/2023/datastream.txt"
-                streamPoseToFile(file_d, rvec_d, [[dx],[dy],[dz]])
+                #file_d = "C:/Users/mdimaggio/Documents/Summer Research/2023/datastream.txt"
+                #streamPoseToFile(file_d, rvec_d, [[dx],[dy],[dz]])
                 
                 cv.drawFrameAxes(frame, mtx, dist, rvec_d, tvec_d, 70)  # Draws True Origin
                 drawCustomAxis(frame, [95, 115, 0], 70, rvec_d, tvec_d, mtx, dist)  # Draws Center Axis
