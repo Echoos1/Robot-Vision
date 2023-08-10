@@ -1,5 +1,5 @@
-#!/usr/bin python generate_aruco.py
-"""detect_aruco.py: Locates the camera pose in space.
+#!/usr/bin python RaspiVision.py
+"""RaspiVision.py: Locates the camera pose in space.
 """
 
 __version__ = "0.10.0"
@@ -17,6 +17,13 @@ from pathlib import Path
 import numpy as np
 import cv2 as cv
 from cv2 import aruco
+
+
+class Settings:    
+    initCount = 0
+
+
+
 
 # Camera Configuration and Setup
 print("[INFO] Configuring Camera")
@@ -82,7 +89,6 @@ def resetPins():
     GPIO.output(Bi11, 0) # Green
     GPIO.output(BiS, 0) # Green
     GPIO.output(CamStep, 0) # Red
-    GPIO.cleanup()
 
 
 def setBin(binary):
@@ -106,7 +112,7 @@ def step(stepMessage = None):
     # Sends Step Signal
     GPIO.output(CamStep, 1)
     if stepMessage:
-        print(stepMessage)
+        print(f'[STEP] {stepMessage}')
     # Waits for a full Step Signal from robot, on then off
     while True:
         if GPIO.input(robStep) and GPIO.input(robReady):
@@ -123,6 +129,7 @@ def step(stepMessage = None):
         
     # Turns off step signal
     GPIO.output(CamStep, 0)
+    time.sleep(.05)
 
 
 def getInput():
@@ -339,13 +346,15 @@ def sendToRob(pose):
     sendItem(pQY*1000,itemName="Pickup QY")
     sendItem(pQZ*1000,itemName="Pickup QZ")
     # Send Dropoff Boards
-    sendItem(dX*1000,itemName="Dropoff X")
-    sendItem(dY*1000,itemName="Dropoff Y")
-    sendItem(dZ*1000,itemName="Dropoff Z")
+    sendItem(dX,itemName="Dropoff X")
+    sendItem(dY,itemName="Dropoff Y")
+    sendItem(dZ,itemName="Dropoff Z")
     sendItem(dQW*1000,itemName="Dropoff QW")
     sendItem(dQX*1000,itemName="Dropoff QX")
     sendItem(dQY*1000,itemName="Dropoff QY")
     sendItem(dQZ*1000,itemName="Dropoff QZ")
+    
+    print(f'{pX}\n{pY}\n{pZ}\n{pQW}\n{pQX}\n{pQY}\n{pQZ}')
     
 
 def mainloop():
@@ -361,10 +370,16 @@ def mainloop():
         mainloop()
     else:
         main()
-    
-    
+
+
 def main():
-    setBin([1,0,1,0,1,0,1,0,1,0,1,0])
+    if Settings.initCount == 0:
+        Settings.initCount = 1
+        print("[PROGRAM START]")
+    else:
+        print("[ERROR] Sync Lost! Returning to Init Sync...")
+    setBin([1,1,1,0,1,1,0,1,1,0,1,1])
+    print("Waiting for Robot Ready...")
     while not GPIO.input(robReady):
         time.sleep(.05)
     step(stepMessage="Waiting for init sync...")
