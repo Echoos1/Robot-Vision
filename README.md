@@ -85,7 +85,7 @@
 
 ![Product Name Screen Shot][product-screenshot]
 
-Created through a fellowship with [Ballard International LLC](https://ballardintl.com/)
+Created through a fellowship with [Ballard International](https://ballardintl.com/)
 
 Industrial robots typically are not aware of 3D space, and all positions must be hard-coded in by an operator. The robot vision solutions that currently exist are usually for conveyor tracking in 2D or rough 3D, and full 3D tracking is often quite expensive and application specific.
 
@@ -244,7 +244,7 @@ Project Link: [https://github.com/Echoos1/Robot-Vision](https://github.com/Echoo
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* [Ballard International LLC](https://ballardintl.com/)
+* [Ballard International](https://ballardintl.com/)
 * [Lawrence Technological University](https://ltu.edu/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
