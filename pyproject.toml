@@ -1,6 +1,6 @@
 [project]
 name = "RobotVision"
-version = "2023.0.11.0"
+version = "2023.1.0.0"
 description = "Custom Robot Vision system for industrial robots"
 readme = "README.md"
 requires-python = ">=3.7"
